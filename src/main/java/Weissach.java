@@ -3,9 +3,10 @@ import java.util.Scanner;
 public class Weissach {
 
     private static final String DIVIDER = "____________________________________________________________";
+    private static final String INDENT = "   ";
 
-    private static String[] items = new String[100];
-    private static int itemCount = 0;
+    private static Task[] tasks = new Task[100];
+    private static int taskCount = 0;
 
     private static void printGreeting() {
         printMessage("Hello! I'm Weissach\n"
@@ -16,31 +17,48 @@ public class Weissach {
         printMessage("Bye. Hope to see you again soon!");
     }
 
-    private static void addItem(String item) {
-        items[itemCount++] = item;
+    private static void addTask(String task) {
+        tasks[taskCount++] = new Task(task);
 
-        printMessage("added: " + item);
+        printMessage("added: " + task);
     }
 
-    private static void listItems() {
-        if (itemCount == 0) {
-            printMessage("No item added yet");
+    private static void listTasks() {
+        if (taskCount == 0) {
+            printMessage("No task added yet");
             return;
         }
 
-        String result = "";
-        for (int i = 0; i < itemCount - 1; i++) {
-            result += String.format("%d. %s\n", i+1, items[i]);
+        String result = "Here are the tasks in your lists:\n";
+        for (int i = 0; i < taskCount - 1; i++) {
+            result += INDENT + String.format("%d. %s\n", i + 1, tasks[i].toString());
         }
 
-        result += String.format("%d. %s", itemCount, items[itemCount-1]);
+        result += INDENT + String.format("%d. %s", taskCount, tasks[taskCount - 1].toString());
         printMessage(result);
     }
 
+    private static void markTask(int taskIdx) {
+        if (taskIdx >= 0 && taskIdx < taskCount) {
+            tasks[taskIdx].markAsDone();
+            printMessage("Nice! I've marked this task as done:\n"
+                    + INDENT + tasks[taskIdx].toString());
+        }
+    }
+
+    private static void unmarkTask(int taskIdx) {
+        if (taskIdx >= 0 && taskIdx < taskCount) {
+            tasks[taskIdx].markAsNotDone();
+            printMessage("OK, I've marked this task as not done yet:\n"
+                    + INDENT + tasks[taskIdx].toString());
+        }
+    }
+
+
     private static void printMessage(String message) {
-        System.out.println(DIVIDER);
-        System.out.println(message);
-        System.out.println(DIVIDER);
+        System.out.println(INDENT + DIVIDER);
+        System.out.println(INDENT + message.replace("\n", "\n" + INDENT));
+        System.out.println(INDENT + DIVIDER);
     }
 
     public static void main(String[] args) {
@@ -56,9 +74,19 @@ public class Weissach {
                 printExitMessage();
                 break;
             } else if (input.equals("list")) {
-                listItems();
+                listTasks();
+            } else if (input.startsWith("mark")) {
+                String[] split = input.split(" ");
+
+                int idx = Integer.parseInt(split[1]) - 1;
+                markTask(idx);
+            } else if (input.startsWith("unmark")) {
+                String[] split = input.split(" ");
+
+                int idx = Integer.parseInt(split[1]) - 1;
+                unmarkTask(idx);
             } else {
-                addItem(input);
+                addTask(input);
             }
         }
 
