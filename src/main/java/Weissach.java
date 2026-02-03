@@ -70,26 +70,41 @@ public class Weissach {
             System.out.print("> ");
             String input = in.nextLine();
 
-            if (input.equals("bye")){
+            if (input.isEmpty()) {
+                continue;
+            }
+
+            String[] parts = input.split(" ");
+            String command = parts[0];
+
+            switch (command) {
+            case "bye":
                 printExitMessage();
-                break;
-            } else if (input.equals("list")) {
+                in.close();
+                return;
+
+            case "list":
                 listTasks();
-            } else if (input.startsWith("mark")) {
-                String[] split = input.split(" ");
+                break;
 
-                int idx = Integer.parseInt(split[1]) - 1;
-                markTask(idx);
-            } else if (input.startsWith("unmark")) {
-                String[] split = input.split(" ");
+            case "mark":
+                if (parts.length < 2) {
+                    printMessage("Please specify the task number");
+                    break;
+                }
+                markTask(Integer.parseInt(parts[1]) - 1);
+                break;
+            case "unmark":
+                if (parts.length < 2) {
+                    printMessage("Please specify the task number");
+                    break;
+                }
+                unmarkTask(Integer.parseInt(parts[1]) - 1);
+                break;
 
-                int idx = Integer.parseInt(split[1]) - 1;
-                unmarkTask(idx);
-            } else {
+            default:
                 addTask(input);
             }
         }
-
-        in.close();
     }
 }
