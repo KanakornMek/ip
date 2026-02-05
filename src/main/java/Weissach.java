@@ -17,10 +17,32 @@ public class Weissach {
         printMessage("Bye. Hope to see you again soon!");
     }
 
-    private static void addTask(String task) {
-        tasks[taskCount++] = new Task(task);
+    private static void addTask(String input) {
+        String[] parts = input.split(" ", 2);
+        String command = parts[0];
+        String description = parts[1];
+        Task newTask;
 
-        printMessage("added: " + task);
+        switch (command) {
+        case "todo":
+            newTask = new Todo(description);
+            break;
+        case "deadline":
+            String[] deadlineParts = description.split(" /by ");
+            newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
+            break;
+        case "event":
+            String[] eventParts = description.split(" /from | /to ");
+            newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
+            break;
+        default:
+            newTask = new Todo(input);
+        }
+
+        tasks[taskCount++] = newTask;
+        printMessage("Got it. I've added this task:\n"
+                + INDENT + newTask.toString()
+                + "\nNow you have " + taskCount + " tasks in the list.");
     }
 
     private static void listTasks() {
@@ -29,7 +51,7 @@ public class Weissach {
             return;
         }
 
-        String result = "Here are the tasks in your lists:\n";
+        String result = "Here are the tasks in your list:\n";
         for (int i = 0; i < taskCount - 1; i++) {
             result += INDENT + String.format("%d. %s\n", i + 1, tasks[i].toString());
         }
@@ -94,12 +116,19 @@ public class Weissach {
                 }
                 markTask(Integer.parseInt(parts[1]) - 1);
                 break;
+
             case "unmark":
                 if (parts.length < 2) {
                     printMessage("Please specify the task number");
                     break;
                 }
                 unmarkTask(Integer.parseInt(parts[1]) - 1);
+                break;
+
+            case "todo":
+            case "deadline":
+            case "event":
+                addTask(input);
                 break;
 
             default:
