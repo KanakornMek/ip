@@ -1,4 +1,12 @@
+package weissach;
+
 import java.util.Scanner;
+
+import weissach.exception.WeissachException;
+import weissach.task.Deadline;
+import weissach.task.Event;
+import weissach.task.Task;
+import weissach.task.Todo;
 
 public class Weissach {
 
@@ -65,7 +73,7 @@ public class Weissach {
                 + "\nNow you have " + taskCount + " tasks in the list.");
     }
 
-    private static void listTasks() throws WeissachException{
+    private static void listTasks() throws WeissachException {
         if (taskCount == 0) {
             printMessage("No task added yet");
             return;
