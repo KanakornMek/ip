@@ -22,4 +22,8 @@ public class Task {
         String icon = "[" + (isDone ? "X" : " ") + "]";
         return icon + " " + description;
     }
+
+    public String toFileString() {
+        return " | " + (isDone ? "1" : "0") + " | " + description;
+    }
 }
