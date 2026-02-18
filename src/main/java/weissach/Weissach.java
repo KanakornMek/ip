@@ -1,5 +1,6 @@
 package weissach;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import weissach.exception.WeissachException;
@@ -14,8 +15,7 @@ public class Weissach {
     private static final String INDENT = "   ";
     private static final int MAX_TASKS = 100;
 
-    private static Task[] tasks = new Task[MAX_TASKS];
-    private static int taskCount = 0;
+    private static ArrayList<Task> tasks = new ArrayList<>();
 
     private static void printGreeting() {
         printMessage("Hello! I'm Weissach\n"
@@ -67,47 +67,57 @@ public class Weissach {
             throw new WeissachException("Unknown command!!");
         }
 
-        tasks[taskCount++] = newTask;
+        tasks.add(newTask);
         printMessage("Got it. I've added this task:\n"
                 + INDENT + newTask.toString()
-                + "\nNow you have " + taskCount + " tasks in the list.");
+                + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 
     private static void listTasks() throws WeissachException {
-        if (taskCount == 0) {
+        if (tasks.isEmpty()) {
             printMessage("No task added yet");
             return;
         }
 
         String result = "Here are the tasks in your list:\n";
-        for (int i = 0; i < taskCount - 1; i++) {
-            result += INDENT + String.format("%d. %s\n", i + 1, tasks[i].toString());
+        for (int i = 0; i < tasks.size(); i++) {
+            result += INDENT + String.format("%d. %s\n", i + 1, tasks.get(i).toString());
         }
 
-        result += INDENT + String.format("%d. %s", taskCount, tasks[taskCount - 1].toString());
-        printMessage(result);
+        printMessage(result.trim());
     }
 
     private static void markTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < taskCount) {
-            tasks[taskIdx].markAsDone();
+        if (taskIdx >= 0 && taskIdx < tasks.size()) {
+            tasks.get(taskIdx).markAsDone();
             printMessage("Nice! I've marked this task as done:\n"
-                    + INDENT + tasks[taskIdx].toString());
+                    + INDENT + tasks.get(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
     private static void unmarkTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < taskCount) {
-            tasks[taskIdx].markAsNotDone();
+        if (taskIdx >= 0 && taskIdx < tasks.size()) {
+            tasks.get(taskIdx).markAsNotDone();
             printMessage("OK, I've marked this task as not done yet:\n"
-                    + INDENT + tasks[taskIdx].toString());
+                    + INDENT + tasks.get(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
+    private static void deleteTask(int taskIdx) throws WeissachException {
+        if (taskIdx >= 0 && taskIdx < tasks.size()) {
+            Task removedTask = tasks.get(taskIdx);
+            tasks.remove(taskIdx);
+            printMessage("Noted. I've removed this task:\n"
+                    + INDENT + removedTask.toString()
+                    + "\nNow you have " + tasks.size() + " tasks in the list.");
+        } else {
+            throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
+        }
+    }
 
     private static void printMessage(String message) {
         System.out.println(INDENT + DIVIDER);
@@ -164,6 +174,17 @@ public class Weissach {
                     try {
                         unmarkTask(Integer.parseInt(parts[1]) - 1);
                     } catch (NumberFormatException e){
+                        throw new WeissachException("That's not a number! Please enter a valid task ID.");
+                    }
+                    break;
+
+                case "delete":
+                    if (parts.length < 2) {
+                        throw new WeissachException("You forgot to say which task to delete!");
+                    }
+                    try {
+                        deleteTask(Integer.parseInt(parts[1]) - 1);
+                    } catch (NumberFormatException e) {
                         throw new WeissachException("That's not a number! Please enter a valid task ID.");
                     }
                     break;
