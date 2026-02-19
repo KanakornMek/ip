@@ -188,6 +188,7 @@ public class Weissach {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             Task removedTask = tasks.get(taskIdx);
             tasks.remove(taskIdx);
+            saveData();
             printMessage("Noted. I've removed this task:\n"
                     + INDENT + removedTask.toString()
                     + "\nNow you have " + tasks.size() + " tasks in the list.");
