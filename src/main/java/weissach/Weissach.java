@@ -15,21 +15,9 @@ import weissach.task.Todo;
 
 public class Weissach {
 
-    private static final String DIVIDER = "____________________________________________________________";
-    private static final String INDENT = "   ";
-    private static final int MAX_TASKS = 100;
     private static final String FILE_PATH = "./data/weissach.txt";
-
     private static ArrayList<Task> tasks = new ArrayList<>();
-
-    private static void printGreeting() {
-        printMessage("Hello! I'm Weissach\n"
-                + "What can I do for you?");
-    }
-
-    private static void printExitMessage() {
-        printMessage("Bye. Hope to see you again soon!");
-    }
+    private static Ui ui = new Ui();
 
     private static void loadData() throws WeissachException {
         File file = new File(FILE_PATH);
@@ -143,31 +131,31 @@ public class Weissach {
 
         tasks.add(newTask);
         saveData();
-        printMessage("Got it. I've added this task:\n"
-                + INDENT + newTask.toString()
+        ui.showMessage("Got it. I've added this task:\n   "
+                + newTask.toString()
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 
     private static void listTasks() throws WeissachException {
         if (tasks.isEmpty()) {
-            printMessage("No task added yet");
+            ui.showMessage("No task added yet");
             return;
         }
 
         String result = "Here are the tasks in your list:\n";
         for (int i = 0; i < tasks.size(); i++) {
-            result += INDENT + String.format("%d. %s\n", i + 1, tasks.get(i).toString());
+            result += "   " + String.format("%d. %s\n", i + 1, tasks.get(i).toString());
         }
 
-        printMessage(result.trim());
+        ui.showMessage(result.trim());
     }
 
     private static void markTask(int taskIdx) throws WeissachException {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             tasks.get(taskIdx).markAsDone();
             saveData();
-            printMessage("Nice! I've marked this task as done:\n"
-                    + INDENT + tasks.get(taskIdx).toString());
+            ui.showMessage("Nice! I've marked this task as done:\n   "
+                    + tasks.get(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
@@ -177,8 +165,8 @@ public class Weissach {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             tasks.get(taskIdx).markAsNotDone();
             saveData();
-            printMessage("OK, I've marked this task as not done yet:\n"
-                    + INDENT + tasks.get(taskIdx).toString());
+            ui.showMessage("OK, I've marked this task as not done yet:\n   "
+                    + tasks.get(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
@@ -189,35 +177,25 @@ public class Weissach {
             Task removedTask = tasks.get(taskIdx);
             tasks.remove(taskIdx);
             saveData();
-            printMessage("Noted. I've removed this task:\n"
-                    + INDENT + removedTask.toString()
+            ui.showMessage("Noted. I've removed this task:\n   "
+                    + removedTask.toString()
                     + "\nNow you have " + tasks.size() + " tasks in the list.");
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
-
-    private static void printMessage(String message) {
-        System.out.println(INDENT + DIVIDER);
-        System.out.println(INDENT + message.replace("\n", "\n" + INDENT));
-        System.out.println(INDENT + DIVIDER);
-    }
-
     public static void main(String[] args) {
-        printGreeting();
+        ui.showWelcome();
 
         try {
             loadData();
         } catch (WeissachException e) {
-            printMessage("Uh-oh. " + e.getMessage());
+            ui.showError(e.getMessage());
         }
 
-        Scanner in = new Scanner(System.in);
-
         while (true) {
-            System.out.print("> ");
-            String input = in.nextLine();
+            String input = ui.readCommand();
 
             if (input.isEmpty()) {
                 continue;
@@ -229,8 +207,7 @@ public class Weissach {
 
                 switch (command) {
                 case "bye":
-                    printExitMessage();
-                    in.close();
+                    ui.showExit();
                     return;
 
                 case "list":
@@ -278,7 +255,7 @@ public class Weissach {
                     parseAndAddTask(input);
                 }
             } catch (WeissachException e) {
-                printMessage("Uh-oh. " + e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
     }
