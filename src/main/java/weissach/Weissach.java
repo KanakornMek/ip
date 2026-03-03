@@ -1,11 +1,6 @@
 package weissach;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import weissach.exception.WeissachException;
 import weissach.task.Deadline;
@@ -15,78 +10,9 @@ import weissach.task.Todo;
 
 public class Weissach {
 
-    private static final String FILE_PATH = "./data/weissach.txt";
     private static ArrayList<Task> tasks = new ArrayList<>();
-    private static Ui ui = new Ui();
-
-    private static void loadData() throws WeissachException {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) {
-            return;
-        }
-
-        try (Scanner fileScanner = new Scanner(file)) {
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] parts = line.split(" \\| ");
-
-                String type = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String description = parts[2];
-
-                Task newTask = null;
-
-                switch (type) {
-                case "T":
-                    newTask = new Todo(description);
-                    break;
-                case "D":
-                    String by = parts[3];
-                    newTask = new Deadline(description, by);
-                    break;
-                case "E":
-                    String from = parts[3];
-                    String to = parts[4];
-                    newTask = new Event(description, from, to);
-                    break;
-                }
-
-                if (newTask != null) {
-                    if (isDone) {
-                        newTask.markAsDone();
-                    }
-                    tasks.add(newTask);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw new WeissachException("Error loading file: " + e.getMessage());
-        } catch (Exception e) {
-            throw new WeissachException("Error parsing file: " + e.getMessage());
-        }
-    }
-
-    private static void saveData() throws WeissachException {
-        try {
-            File file = new File(FILE_PATH);
-
-            File parentDir = file.getParentFile();
-
-            if (parentDir != null && !parentDir.exists()) {
-                boolean isDirCreated = parentDir.mkdirs();
-                if (!isDirCreated) {
-                    throw new WeissachException("Failed to create directory " + parentDir.getAbsolutePath());
-                }
-            }
-
-            FileWriter writer = new FileWriter(file);
-            for (int i = 0; i < tasks.size(); i++) {
-                writer.write(tasks.get(i).toFileString() + "\n");
-            }
-            writer.close();
-        } catch (IOException e) {
-            throw new WeissachException("Error saving file: " + e.getMessage());
-        }
-    }
+    private static final Ui ui = new Ui();
+    private static final Storage storage = new Storage("./data/weissach.txt");
 
     private static void parseAndAddTask(String input) throws WeissachException {
         String[] parts = input.split(" ", 2);
@@ -130,7 +56,7 @@ public class Weissach {
         }
 
         tasks.add(newTask);
-        saveData();
+        storage.save(tasks);
         ui.showMessage("Got it. I've added this task:\n   "
                 + newTask.toString()
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
@@ -153,7 +79,7 @@ public class Weissach {
     private static void markTask(int taskIdx) throws WeissachException {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             tasks.get(taskIdx).markAsDone();
-            saveData();
+            storage.save(tasks);
             ui.showMessage("Nice! I've marked this task as done:\n   "
                     + tasks.get(taskIdx).toString());
         } else {
@@ -164,7 +90,7 @@ public class Weissach {
     private static void unmarkTask(int taskIdx) throws WeissachException {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             tasks.get(taskIdx).markAsNotDone();
-            saveData();
+            storage.save(tasks);
             ui.showMessage("OK, I've marked this task as not done yet:\n   "
                     + tasks.get(taskIdx).toString());
         } else {
@@ -176,7 +102,7 @@ public class Weissach {
         if (taskIdx >= 0 && taskIdx < tasks.size()) {
             Task removedTask = tasks.get(taskIdx);
             tasks.remove(taskIdx);
-            saveData();
+            storage.save(tasks);
             ui.showMessage("Noted. I've removed this task:\n   "
                     + removedTask.toString()
                     + "\nNow you have " + tasks.size() + " tasks in the list.");
@@ -189,7 +115,7 @@ public class Weissach {
         ui.showWelcome();
 
         try {
-            loadData();
+            tasks = storage.load();
         } catch (WeissachException e) {
             ui.showError(e.getMessage());
         }
