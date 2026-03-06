@@ -10,7 +10,7 @@ import weissach.task.Todo;
 
 public class Weissach {
 
-    private static ArrayList<Task> tasks = new ArrayList<>();
+    private static TaskList tasks;
     private static final Ui ui = new Ui();
     private static final Storage storage = new Storage("./data/weissach.txt");
 
@@ -55,11 +55,11 @@ public class Weissach {
             throw new WeissachException("Unknown command!!");
         }
 
-        tasks.add(newTask);
+        tasks.addTask(newTask);
         storage.save(tasks);
         ui.showMessage("Got it. I've added this task:\n   "
                 + newTask.toString()
-                + "\nNow you have " + tasks.size() + " tasks in the list.");
+                + "\nNow you have " + tasks.getSize() + " tasks in the list.");
     }
 
     private static void listTasks() throws WeissachException {
@@ -68,44 +68,44 @@ public class Weissach {
             return;
         }
 
-        String result = "Here are the tasks in your list:\n";
-        for (int i = 0; i < tasks.size(); i++) {
-            result += "   " + String.format("%d. %s\n", i + 1, tasks.get(i).toString());
+        StringBuilder result = new StringBuilder("Here are the tasks in your list:\n");
+        for (int i = 0; i < tasks.getSize(); i++) {
+            result.append("   ").append(String.format("%d. %s\n", i + 1, tasks.getTask(i).toString()));
         }
 
-        ui.showMessage(result.trim());
+        ui.showMessage(result.toString().trim());
     }
 
     private static void markTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.size()) {
-            tasks.get(taskIdx).markAsDone();
+        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
+            tasks.getTask(taskIdx).markAsDone();
             storage.save(tasks);
             ui.showMessage("Nice! I've marked this task as done:\n   "
-                    + tasks.get(taskIdx).toString());
+                    + tasks.getTask(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
     private static void unmarkTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.size()) {
-            tasks.get(taskIdx).markAsNotDone();
+        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
+            tasks.getTask(taskIdx).markAsNotDone();
             storage.save(tasks);
             ui.showMessage("OK, I've marked this task as not done yet:\n   "
-                    + tasks.get(taskIdx).toString());
+                    + tasks.getTask(taskIdx).toString());
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
     private static void deleteTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.size()) {
-            Task removedTask = tasks.get(taskIdx);
-            tasks.remove(taskIdx);
+        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
+            Task removedTask = tasks.getTask(taskIdx);
+            tasks.deleteTask(taskIdx);
             storage.save(tasks);
             ui.showMessage("Noted. I've removed this task:\n   "
                     + removedTask.toString()
-                    + "\nNow you have " + tasks.size() + " tasks in the list.");
+                    + "\nNow you have " + tasks.getSize() + " tasks in the list.");
         } else {
             throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
@@ -115,9 +115,10 @@ public class Weissach {
         ui.showWelcome();
 
         try {
-            tasks = storage.load();
+            tasks = new TaskList(storage.load());
         } catch (WeissachException e) {
             ui.showError(e.getMessage());
+            tasks = new TaskList();
         }
 
         while (true) {

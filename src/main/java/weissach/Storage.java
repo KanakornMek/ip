@@ -63,7 +63,7 @@ public class Storage {
         return loadedTasks;
     }
 
-    public void save(ArrayList<Task> tasks) throws WeissachException {
+    public void save(TaskList tasks) throws WeissachException {
         try {
             File file = new File(filePath);
             File parentDir = file.getParentFile();
@@ -75,8 +75,8 @@ public class Storage {
             }
 
             FileWriter writer = new FileWriter(file);
-            for (int i = 0; i < tasks.size(); i++) {
-                writer.write(tasks.get(i).toFileString() + "\n");
+            for (int i = 0; i < tasks.getSize(); i++) {
+                writer.write(tasks.getTask(i).toFileString() + "\n");
             }
             writer.close();
         } catch (IOException e) {
