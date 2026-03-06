@@ -5,6 +5,10 @@ import java.util.Scanner;
 
 import weissach.task.Task;
 
+/**
+ * Handles all user interface interactions.
+ * Responsible for displaying messages to the console and capturing user input.
+ */
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
     private static final String INDENT = "   ";
@@ -28,10 +32,22 @@ public class Ui {
         System.out.println(INDENT + DIVIDER);
     }
 
+    /**
+     * Displays a formatted message to the user console.
+     * Prints the message wrapped between horizontal divider lines.
+     *
+     * @param message The text to be shown to the user.
+     */
     public void showMessage(String message) {
         System.out.println(INDENT + message.replace("\n", "\n" + INDENT));
     }
 
+    /**
+     * Displays the list of tasks that match the search keyword.
+     * If no tasks are found, returns a message indicating no results.
+     *
+     * @param foundTasks The list of tasks that contain the search keyword.
+     */
     public void showFoundTasks(ArrayList<Task> foundTasks) {
         if (foundTasks.isEmpty()) {
             showMessage("No matching tasks found.");
@@ -49,6 +65,11 @@ public class Ui {
         showMessage("Uh-oh. " + message);
     }
 
+    /**
+     * Returns the next line of input provided by the user.
+     *
+     * @return The raw string input from the terminal.
+     */
     public String readCommand() {
         System.out.print("> ");
         return scanner.nextLine();

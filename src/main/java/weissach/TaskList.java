@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import weissach.task.Task;
 import weissach.exception.WeissachException;
 
+/**
+ * Represents the list of tasks and handles task operations like adding, deleting, unmarking, and marking tasks.
+ */
 public class TaskList {
     private final ArrayList<Task> tasks;
 
@@ -15,10 +18,23 @@ public class TaskList {
         this.tasks = tasks;
     }
 
+    /**
+     * Adds a new task to the list.
+     *
+     * @param task The task to be added.
+     */
     public void addTask(Task task) {
         tasks.add(task);
     }
 
+    /**
+     * Returns the task that was deleted from the list.
+     * Removes the task at the specified zero-based index.
+     *
+     * @param index The position of the task in the list.
+     * @return The Task object that was removed.
+     * @throws WeissachException If the index is outside the valid range of the list.
+     */
     public Task deleteTask(int index) throws WeissachException {
         if (index < 0 || index >= tasks.size()) {
             throw new WeissachException("Task ID " + (index + 1) + " doesn't exist.");
@@ -26,6 +42,13 @@ public class TaskList {
         return tasks.remove(index);
     }
 
+    /**
+     * Returns the task that was marked as completed.
+     *
+     * @param index The zero-based index of the task to mark.
+     * @return The Task object that has been marked as done.
+     * @throws WeissachException If the index provided is invalid.
+     */
     public Task markTask(int index) throws WeissachException {
         if (index < 0 || index >= tasks.size()) {
             throw new WeissachException("Task ID " + (index + 1) + " doesn't exist.");
@@ -35,6 +58,13 @@ public class TaskList {
         return task;
     }
 
+    /**
+     * Returns the task that was unmarked.
+     *
+     * @param index The zero-based index of the task to mark.
+     * @return The Task object that has been unmarked.
+     * @throws WeissachException If the index provided is invalid.
+     */
     public Task unmarkTask(int index) throws WeissachException {
         if (index < 0 || index >= tasks.size()) {
             throw new WeissachException("Task ID " + (index + 1) + " doesn't exist.");
@@ -56,6 +86,12 @@ public class TaskList {
         return tasks.isEmpty();
     }
 
+    /**
+     * Return tasks that contain the specified keyword in their description.
+     *
+     * @param keyword The word to search for.
+     * @return An ArrayList of tasks that match the keyword.
+     */
     public ArrayList<Task> findTasks(String keyword) {
         ArrayList<Task> matchingTasks = new ArrayList<>();
         for (Task task : tasks) {
