@@ -1,6 +1,9 @@
 package weissach;
 
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import weissach.task.Task;
 
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
@@ -27,6 +30,19 @@ public class Ui {
 
     public void showMessage(String message) {
         System.out.println(INDENT + message.replace("\n", "\n" + INDENT));
+    }
+
+    public void showFoundTasks(ArrayList<Task> foundTasks) {
+        if (foundTasks.isEmpty()) {
+            showMessage("No matching tasks found.");
+            return;
+        }
+
+        StringBuilder result = new StringBuilder("Here are the matching tasks in your list:\n");
+        for (int i = 0; i < foundTasks.size(); i++) {
+            result.append("   ").append(String.format("%d. %s\n", i + 1, foundTasks.get(i).toString()));
+        }
+        showMessage(result.toString().trim());
     }
 
     public void showError(String message) {

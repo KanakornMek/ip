@@ -1,3 +1,5 @@
 T | 1 | do hw
 D | 0 | CS project | 2026-03-20
 E | 0 | study stats | 2026-03-01 | 2026-03-20
+T | 1 | read book
+D | 0 | return book | 2026-10-05
