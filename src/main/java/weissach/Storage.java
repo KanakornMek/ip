@@ -13,6 +13,10 @@ import weissach.task.Event;
 import weissach.task.Task;
 import weissach.task.Todo;
 
+/**
+ * Represents the file storage system. Used to read from and write tasks to
+ * the local disk.
+ */
 public class Storage {
     private final String filePath;
 
@@ -20,6 +24,13 @@ public class Storage {
         this.filePath = filePath;
     }
 
+    /**
+     * Returns the list of tasks loaded from the storage file.
+     * Parses each line of the text file into the corresponding Task object.
+     *
+     * @return An ArrayList of tasks retrieved from the file.
+     * @throws WeissachException If the file cannot be read or parsing fails.
+     */
     public ArrayList<Task> load() throws WeissachException {
         ArrayList<Task> loadedTasks = new ArrayList<>();
         File file = new File(filePath);
@@ -63,6 +74,12 @@ public class Storage {
         return loadedTasks;
     }
 
+    /**
+     * Saves the current list of tasks to the text file.
+     *
+     * @param tasks The TaskList containing the tasks to be saved.
+     * @throws WeissachException If there is an error creating the directory or writing to the file.
+     */
     public void save(TaskList tasks) throws WeissachException {
         try {
             File file = new File(filePath);

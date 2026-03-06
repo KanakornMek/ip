@@ -13,8 +13,19 @@ import weissach.task.Deadline;
 import weissach.task.Event;
 import weissach.task.Todo;
 
+/**
+ * Handles parsing user's raw string input and translating it into executable commands.
+ */
 public class Parser {
 
+    /**
+     * Returns a Command object based on the user's raw input string.
+     * Identifies the command type and extracts necessary arguments.
+     *
+     * @param fullCommand The full line of text entered by the user.
+     * @return An executable Command representing the user's intent.
+     * @throws WeissachException If the command word is unknown or the format is incorrect.
+     */
     public static Command parse(String fullCommand) throws WeissachException {
         String[] parts = fullCommand.split(" ", 2);
         String commandWord = parts[0];
