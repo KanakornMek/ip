@@ -14,7 +14,7 @@ import weissach.task.Task;
 import weissach.task.Todo;
 
 public class Storage {
-    private String filePath;
+    private final String filePath;
 
     public Storage(String filePath) {
         this.filePath = filePath;

@@ -1,189 +1,51 @@
 package weissach;
 
-import java.util.ArrayList;
-
+import weissach.command.Command;
 import weissach.exception.WeissachException;
-import weissach.task.Deadline;
-import weissach.task.Event;
-import weissach.task.Task;
-import weissach.task.Todo;
 
 public class Weissach {
+    private final Storage storage;
+    private TaskList tasks;
+    private final Ui ui;
 
-    private static TaskList tasks;
-    private static final Ui ui = new Ui();
-    private static final Storage storage = new Storage("./data/weissach.txt");
-
-    private static void parseAndAddTask(String input) throws WeissachException {
-        String[] parts = input.split(" ", 2);
-        String command = parts[0];
-        Task newTask;
-
-        if (!command.equals("todo") && !command.equals("deadline") &&
-                !command.equals("event")) {
-            throw new WeissachException("Unknown command! I don't know what \"" + command + "\" means.\n"
-                    + "Try asking me for a 'todo', 'deadline', or 'event'.");
+    public Weissach(String filePath) {
+        ui = new Ui();
+        storage = new Storage(filePath);
+        try {
+            tasks = new TaskList(storage.load());
+        } catch (WeissachException e) {
+            ui.showError("Error loading file: " + e.getMessage());
+            tasks = new TaskList();
         }
+    }
 
-        if (parts.length < 2 || parts[1].trim().isEmpty()) {
-            throw new WeissachException("The description of a " + command + " cannot be empty.");
-        }
+    public void run() {
+        ui.showWelcome();
+        boolean isExit = false;
 
-        String description = parts[1];
+        while (!isExit) {
+            try {
+                String fullCommand = ui.readCommand();
+                if (fullCommand.trim().isEmpty()) {
+                    continue;
+                }
+                ui.showLine();
 
-        switch (command) {
-        case "todo":
-            newTask = new Todo(description);
-            break;
-        case "deadline":
-            String[] deadlineParts = description.split(" /by ");
-            if (deadlineParts.length < 2) {
-                throw new WeissachException("Don't leave me hanging! When is this due?\n"
-                        + "Please use '/by' to set the deadline.");
+                Command c = Parser.parse(fullCommand);
+                c.execute(tasks, ui, storage);
+
+                isExit = c.isExit();
+            } catch (WeissachException e) {
+                ui.showError(e.getMessage());
+            } catch (NumberFormatException e) {
+                ui.showError("That's not a number! Please enter a valid task ID.");
+            } finally {
+                ui.showLine();
             }
-            newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
-            break;
-        case "event":
-            String[] eventParts = description.split(" /from | /to ");
-            if (eventParts.length < 3) {
-                throw new WeissachException("When is the event?\n"
-                        + "You need to tell me when this starts and ends using '/from' and '/to'.");
-            }
-            newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
-            break;
-        default:
-            throw new WeissachException("Unknown command!!");
-        }
-
-        tasks.addTask(newTask);
-        storage.save(tasks);
-        ui.showMessage("Got it. I've added this task:\n   "
-                + newTask.toString()
-                + "\nNow you have " + tasks.getSize() + " tasks in the list.");
-    }
-
-    private static void listTasks() throws WeissachException {
-        if (tasks.isEmpty()) {
-            ui.showMessage("No task added yet");
-            return;
-        }
-
-        StringBuilder result = new StringBuilder("Here are the tasks in your list:\n");
-        for (int i = 0; i < tasks.getSize(); i++) {
-            result.append("   ").append(String.format("%d. %s\n", i + 1, tasks.getTask(i).toString()));
-        }
-
-        ui.showMessage(result.toString().trim());
-    }
-
-    private static void markTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
-            tasks.getTask(taskIdx).markAsDone();
-            storage.save(tasks);
-            ui.showMessage("Nice! I've marked this task as done:\n   "
-                    + tasks.getTask(taskIdx).toString());
-        } else {
-            throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
-        }
-    }
-
-    private static void unmarkTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
-            tasks.getTask(taskIdx).markAsNotDone();
-            storage.save(tasks);
-            ui.showMessage("OK, I've marked this task as not done yet:\n   "
-                    + tasks.getTask(taskIdx).toString());
-        } else {
-            throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
-        }
-    }
-
-    private static void deleteTask(int taskIdx) throws WeissachException {
-        if (taskIdx >= 0 && taskIdx < tasks.getSize()) {
-            Task removedTask = tasks.getTask(taskIdx);
-            tasks.deleteTask(taskIdx);
-            storage.save(tasks);
-            ui.showMessage("Noted. I've removed this task:\n   "
-                    + removedTask.toString()
-                    + "\nNow you have " + tasks.getSize() + " tasks in the list.");
-        } else {
-            throw new WeissachException("Task ID " + (taskIdx + 1) + " doesn't exist.");
         }
     }
 
     public static void main(String[] args) {
-        ui.showWelcome();
-
-        try {
-            tasks = new TaskList(storage.load());
-        } catch (WeissachException e) {
-            ui.showError(e.getMessage());
-            tasks = new TaskList();
-        }
-
-        while (true) {
-            String input = ui.readCommand();
-
-            if (input.isEmpty()) {
-                continue;
-            }
-
-            try {
-                String[] parts = input.split(" ");
-                String command = parts[0];
-
-                switch (command) {
-                case "bye":
-                    ui.showExit();
-                    return;
-
-                case "list":
-                    listTasks();
-                    break;
-
-                case "mark":
-                    if (parts.length < 2) {
-                        throw new WeissachException("You forgot to say which task to mark!");
-                    }
-
-                    // convert to zero-based index when marking task
-                    try {
-                        markTask(Integer.parseInt(parts[1]) - 1);
-                    } catch (NumberFormatException e) {
-                        throw new WeissachException("That's not a number! Please enter a valid task ID.");
-                    }
-                    break;
-
-                case "unmark":
-                    if (parts.length < 2) {
-                        throw new WeissachException("You forgot to say which task to unmark!");
-                    }
-
-                    // convert to zero-based index when marking task
-                    try {
-                        unmarkTask(Integer.parseInt(parts[1]) - 1);
-                    } catch (NumberFormatException e){
-                        throw new WeissachException("That's not a number! Please enter a valid task ID.");
-                    }
-                    break;
-
-                case "delete":
-                    if (parts.length < 2) {
-                        throw new WeissachException("You forgot to say which task to delete!");
-                    }
-                    try {
-                        deleteTask(Integer.parseInt(parts[1]) - 1);
-                    } catch (NumberFormatException e) {
-                        throw new WeissachException("That's not a number! Please enter a valid task ID.");
-                    }
-                    break;
-
-                default:
-                    parseAndAddTask(input);
-                }
-            } catch (WeissachException e) {
-                ui.showError(e.getMessage());
-            }
-        }
+        new Weissach("./data/weissach.txt").run();
     }
 }

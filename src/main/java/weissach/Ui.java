@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Ui {
     private static final String DIVIDER = "____________________________________________________________";
     private static final String INDENT = "   ";
-    private Scanner scanner;
+    private final Scanner scanner;
 
     public Ui() {
         this.scanner = new Scanner(System.in);

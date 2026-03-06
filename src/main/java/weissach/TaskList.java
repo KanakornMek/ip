@@ -5,7 +5,7 @@ import weissach.task.Task;
 import weissach.exception.WeissachException;
 
 public class TaskList {
-    private ArrayList<Task> tasks;
+    private final ArrayList<Task> tasks;
 
     public TaskList() {
         this.tasks = new ArrayList<>();
