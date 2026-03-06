@@ -17,6 +17,10 @@ public class Task {
         this.isDone = false;
     }
 
+    public boolean containsKeyword(String keyword) {
+        return this.description.toLowerCase().contains(keyword.toLowerCase());
+    }
+
     @Override
     public String toString() {
         String icon = "[" + (isDone ? "X" : " ") + "]";

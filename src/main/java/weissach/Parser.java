@@ -4,6 +4,7 @@ import weissach.command.AddCommand;
 import weissach.command.Command;
 import weissach.command.DeleteCommand;
 import weissach.command.ExitCommand;
+import weissach.command.FindCommand;
 import weissach.command.ListCommand;
 import weissach.command.MarkCommand;
 import weissach.command.UnmarkCommand;
@@ -23,6 +24,8 @@ public class Parser {
             return new ExitCommand();
         case "list":
             return new ListCommand();
+        case "find":
+            return new FindCommand(parseDescription(parts, "find"));
         case "mark":
             return new MarkCommand(parseIndex(parts, "mark"));
         case "unmark":
